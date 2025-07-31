@@ -1,0 +1,32 @@
+name: "usage_counter"
+backend: "python"
+max_batch_size: ${triton_max_batch_size}
+dynamic_batching {}
+input [
+  {
+    name: "prompt"
+    data_type: TYPE_STRING
+    dims: [ -1 ]
+  }
+]
+output [
+  {
+    name: "num_tokens"
+    data_type: TYPE_INT32
+    dims: [ -1 ]
+  }
+]
+
+parameters {
+  key: "tokenizer_dir"
+  value: {
+    string_value: "${tokenizer_dir}"
+  }
+}
+
+instance_group [
+    {
+        count: ${usageprocessing_instance_count}
+        kind: KIND_CPU
+    }
+]

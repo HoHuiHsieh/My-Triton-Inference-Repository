@@ -1,0 +1,30 @@
+backend: "python"
+max_batch_size: 0
+input [
+  {
+    name: "input.audio"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "output.text"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+
+parameters {
+  key: "model_path"
+  value: {
+    string_value: "/workspace/model"
+  }
+}
+
+instance_group [
+    {
+        count: 1
+        kind: KIND_CPU
+    }
+]
