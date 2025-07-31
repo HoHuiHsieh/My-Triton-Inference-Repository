@@ -18,7 +18,7 @@ output [
 parameters {
   key: "model_path"
   value: {
-    string_value: "/workspace/model"
+    string_value: "/workspace/model/whisper-large-v3-turbo"
   }
 }
 

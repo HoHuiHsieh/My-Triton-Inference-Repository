@@ -34,11 +34,16 @@ class TritonPythonModel:
         model_config = json.loads(args["model_config"])
         model_path = model_config["parameters"]["model_path"]["string_value"]
 
-        self.s2t_convert = OpenCC('s2t')
+        # Check if model path is specified
+        if not model_path:
+            raise ValueError(
+                "Model path is not specified in the configuration.")
 
-        # load model
+        # Set device and dtype based on availability
         device = "cuda:0" if torch.cuda.is_available() else "cpu"
         torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+        # Prepare model
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
@@ -47,10 +52,10 @@ class TritonPythonModel:
         )
         model.to(device)
 
-        # load tokenizer
+        # Prepare processor
         processor = AutoProcessor.from_pretrained(model_path)
 
-        # initialize pipeline
+        # Create the ASR pipeline
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -59,6 +64,9 @@ class TritonPythonModel:
             torch_dtype=torch_dtype,
             device=device,
         )
+
+        # Prepare OpenCC for Simplified to Traditional Chinese conversion
+        self.s2t_convert = OpenCC("s2t.json")
 
     def execute(self, requests):
         """
@@ -70,20 +78,22 @@ class TritonPythonModel:
         # and create a pb_utils.InferenceResponse for each of them.
         for idx, request in enumerate(requests):
             try:
-                # Get audio
+                # Get input tensor by name
                 text_tensor = pb_utils.get_input_tensor_by_name(request,
                                                                 "input.audio")
                 input_audio: str = text_tensor.as_numpy()[0]
 
-                # ASR
+                # Convert audio to text
                 asr_text = self.pipe(input_audio)["text"]
+
+                # Convert text from Simplified to Traditional Chinese
                 output_text = self.s2t_convert.convert(asr_text)
 
-                # output result
+                # Prepare output tensor
                 output_text = np.array([output_text], dtype=np.object_)
                 output_text = pb_utils.Tensor("output.text", output_text)
 
-                # Append results
+                # Create inference response
                 responses.append(pb_utils.InferenceResponse(
                     output_tensors=[output_text]
                 ))
