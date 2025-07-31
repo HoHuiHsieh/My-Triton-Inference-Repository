@@ -4,7 +4,6 @@ import traceback
 import json
 import numpy as np
 import torch
-import torchaudio
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import triton_python_backend_utils as pb_utils
 from opencc import OpenCC
@@ -84,7 +83,10 @@ class TritonPythonModel:
                 input_audio: str = text_tensor.as_numpy()[0]
 
                 # Convert audio to text
-                asr_text = self.pipe(input_audio)["text"]
+                asr_text = self.pipe(
+                    input_audio,
+                    generate_kwargs={"language": "chinese"}
+                )["text"]
 
                 # Convert text from Simplified to Traditional Chinese
                 output_text = self.s2t_convert.convert(asr_text)

@@ -1,0 +1,8 @@
+FROM nvcr.io/nvidia/tritonserver:25.04-pyt-python-py3
+WORKDIR /workspace
+
+# Install Python dependencies
+ADD whisper-large-v3-turbo/requirements.txt /workspace/requirements_1.txt
+# ADD nv-embed-v2/requirements.txt /workspace/requirements_2.txt
+RUN pip install --no-cache-dir -r requirements_1.txt
+# RUN pip install --no-cache-dir -r requirements_2.txt

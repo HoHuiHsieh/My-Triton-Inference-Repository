@@ -44,4 +44,4 @@ docker run -itd --gpus "device=0" \
     -p 8001:8001 \
     -p 8002:8002 \
     -w ${WORKSPACE} \
-    nvcr.io/nvidia/tritonserver:25.04-python-py3 ${CMD}
+    nvcr.io/nvidia/tritonserver:25.04-pyt-python-py3 ${CMD}
