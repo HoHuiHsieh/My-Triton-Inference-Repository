@@ -1,9 +1,12 @@
 """
 """
+import io
+from base64 import b64decode
 import traceback
 import json
 import numpy as np
 import torch
+import torchaudio
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import triton_python_backend_utils as pb_utils
 from opencc import OpenCC
@@ -62,6 +65,10 @@ class TritonPythonModel:
             feature_extractor=processor.feature_extractor,
             torch_dtype=torch_dtype,
             device=device,
+            max_new_tokens=128,
+            chunk_length_s=30,
+            batch_size=16,
+            return_timestamps=True,
         )
 
         # Prepare OpenCC for Simplified to Traditional Chinese conversion
@@ -78,14 +85,36 @@ class TritonPythonModel:
         for idx, request in enumerate(requests):
             try:
                 # Get input tensor by name
-                text_tensor = pb_utils.get_input_tensor_by_name(request,
-                                                                "input.audio")
-                input_audio: str = text_tensor.as_numpy()[0]
+                audio_tensor = pb_utils.get_input_tensor_by_name(request,
+                                                                 "input.audio")
+
+                # Decode audio data
+                audio_data: str = audio_tensor.as_numpy()[0]
+                audio_data = b64decode(audio_data)
+
+                # Convert audio data to a format suitable for the ASR model
+                audio_data = io.BytesIO(audio_data)
+                audio_data, sample_rate = torchaudio.load(audio_data)
+                
+                # Convert to mono if stereo
+                if audio_data.shape[0] > 1:
+                    audio_data = torch.mean(audio_data, dim=0, keepdim=True)
+                
+                # Resample to 16kHz
+                audio_data = torchaudio.functional.resample(audio_data,
+                                                            orig_freq=sample_rate,
+                                                            new_freq=16000)
+                
+                # Convert to numpy and flatten to 1D
+                audio_data = audio_data.squeeze().detach().numpy()
 
                 # Convert audio to text
                 asr_text = self.pipe(
-                    input_audio,
-                    generate_kwargs={"language": "chinese"}
+                    audio_data,
+                    generate_kwargs={
+                        "language": "chinese",
+                        "return_timestamps": True
+                    }
                 )["text"]
 
                 # Convert text from Simplified to Traditional Chinese
@@ -101,10 +130,10 @@ class TritonPythonModel:
                 ))
 
             except Exception as error:
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
                 responses.append(pb_utils.InferenceResponse(
                     output_tensors=[],
-                    error=pb_utils.TritonError(error)
+                    error=pb_utils.TritonError(str(error))
                 ))
 
         # You should return a list of pb_utils.InferenceResponse. Length
