@@ -24,7 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-name: "tokenize"
+name: "tokenizer"
 backend: "python"
 max_batch_size: 0
 input [
@@ -45,7 +45,7 @@ output [
 parameters {
   key: "tokenizer_dir"
   value: {
-    string_value: ${tokenizer_dir}
+    string_value: "${tokenizer_dir}"
   }
 }
 
