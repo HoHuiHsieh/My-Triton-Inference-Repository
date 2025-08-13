@@ -18,7 +18,7 @@ output [
 parameters {
   key: "model_path"
   value: {
-    string_value: ${model_path}
+    string_value: "${model_path}"
   }
 }
 

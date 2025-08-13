@@ -1,4 +1,5 @@
-checkpoint/*
-engine/*
-model/*
-repo/*
+checkpoint/
+engine/
+model/
+repo/
+artifacts/

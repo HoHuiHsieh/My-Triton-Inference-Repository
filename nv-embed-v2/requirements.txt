@@ -1,0 +1,4 @@
+torch==2.2.0
+transformers==4.42.4
+flash-attn==2.2.0
+sentence-transformers==2.7.0
