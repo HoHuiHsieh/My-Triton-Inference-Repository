@@ -1,4 +1,4 @@
-transformers
-torchaudio
+transformers>=4.36.0
+torchaudio>=2.1.0
 accelerate
 opencc

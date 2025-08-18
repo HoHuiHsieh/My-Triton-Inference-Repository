@@ -1,6 +1,7 @@
 """
 """
 import io
+import warnings
 from base64 import b64decode
 import traceback
 import json
@@ -10,6 +11,10 @@ import torchaudio
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import triton_python_backend_utils as pb_utils
 from opencc import OpenCC
+
+# Suppress specific deprecation warnings that are beyond our control
+warnings.filterwarnings("ignore", category=UserWarning, module="torchaudio")
+warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
 
 
 class TritonPythonModel:
@@ -94,7 +99,20 @@ class TritonPythonModel:
 
                 # Convert audio data to a format suitable for the ASR model
                 audio_data = io.BytesIO(audio_data)
-                audio_data, sample_rate = torchaudio.load(audio_data)
+                
+                # Use the recommended loading method to avoid deprecation warnings
+                try:
+                    # Try the newer method first (if available in torchaudio >= 2.9)
+                    if hasattr(torchaudio, 'load_with_torchcodec'):
+                        audio_data, sample_rate = torchaudio.load_with_torchcodec(audio_data)
+                    else:
+                        # Use the current method with warning suppression
+                        with warnings.catch_warnings():
+                            warnings.simplefilter("ignore")
+                            audio_data, sample_rate = torchaudio.load(audio_data)
+                except Exception:
+                    # Fallback to the old method if anything fails
+                    audio_data, sample_rate = torchaudio.load(audio_data)
                 
                 # Convert to mono if stereo
                 if audio_data.shape[0] > 1:
@@ -108,14 +126,16 @@ class TritonPythonModel:
                 # Convert to numpy and flatten to 1D
                 audio_data = audio_data.squeeze().detach().numpy()
 
-                # Convert audio to text
-                asr_text = self.pipe(
-                    audio_data,
+                # Convert audio to text using the pipeline
+                # Use input_features parameter to avoid deprecation warning
+                asr_result = self.pipe(
+                    {"array": audio_data, "sampling_rate": 16000},
                     generate_kwargs={
                         "language": "chinese",
                         "return_timestamps": True
                     }
-                )["text"]
+                )
+                asr_text = asr_result["text"]
 
                 # Convert text from Simplified to Traditional Chinese
                 output_text = self.s2t_convert.convert(asr_text)
