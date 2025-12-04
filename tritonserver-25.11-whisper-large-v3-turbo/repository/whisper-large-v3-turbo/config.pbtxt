@@ -1,0 +1,36 @@
+backend: "python"
+max_batch_size: 0
+input [
+    {
+        name: "input_audio"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    }
+]
+output [
+    {
+        name: "output_text"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    }
+]
+
+parameters {
+    key: "model_path"
+    value: {
+        string_value: "/workspace/model/whisper-large-v3-turbo"
+    }
+}
+parameters {
+    key: "device"
+    value: {
+        string_value: "cuda:0"
+    }
+}
+
+instance_group [
+    {
+        count: 1
+        kind: KIND_CPU
+    }
+]
