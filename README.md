@@ -19,7 +19,9 @@ A collection of AI models deployed on NVIDIA Triton Inference Server for various
 |-------|-------------|-------------------|-----------|
 | **OpenAI GPT OSS 20B** | Large language model with OpenAI-compatible API and function calling | TensorRT-LLM 1.2.0rc5 | [tensorrtllm-1.2.0rc5-openai-gpt-oss-20b](./tensorrtllm-1.2.0rc5-openai-gpt-oss-20b) |
 | **NVIDIA Nemotron Parse v1.1** | Document parsing with bounding box detection and text extraction | Triton 24.10 | [tritonserver-24.10-nemotron-parse-v1.1](./tritonserver-24.10-nemotron-parse-v1.1) |
+| **NVIDIA Llama Embed Nemotron 8B** | High-quality 8B embedding model for semantic search and Q&A retrieval | Triton 25.03 | [tritonserver-25.03-llama-embed-nemotron-8b](./tritonserver-25.03-llama-embed-nemotron-8b) |
 | **NVIDIA Nemotron Nano 12B v2 VL** | Vision-language model for image and video description | Triton 25.03 | [tritonserver-25.03-nemotron-nano-12b](./tritonserver-25.03-nemotron-nano-12b) |
+| **NVIDIA NV-Embed-v2** | State-of-the-art embedding model with L2-normalized outputs for RAG and semantic search | Triton 25.04 | [tritonserver-25.04-nv-embed-v2](./tritonserver-25.04-nv-embed-v2) |
 | **EmbeddingGemma-300M** | Text embedding model for semantic search and similarity | Triton 25.11 | [tritonserver-25.11-embeddinggemma-300m](./tritonserver-25.11-embeddinggemma-300m) |
 | **Whisper-Large-V3-Turbo** | Automatic speech recognition (ASR) for audio transcription | Triton 25.11 | [tritonserver-25.11-whisper-large-v3-turbo](./tritonserver-25.11-whisper-large-v3-turbo) |
 
