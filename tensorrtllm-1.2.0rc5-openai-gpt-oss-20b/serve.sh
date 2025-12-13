@@ -2,7 +2,7 @@
 export WORKSPACE=/workspace
 
 # Run the Docker container with the specified configurations
-docker run -itd --rm --gpus '"device=2"' \
+docker run -itd --rm --gpus '"device=0"' \
     --name tensorrtllm-gpt-oss-20b \
     -v ${PWD}/../../Huggingface/gpt-oss-20b:${WORKSPACE}/model/gpt-oss-20b \
     -v ${PWD}:${WORKSPACE}/src \
